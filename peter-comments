@@ -1,0 +1,50 @@
+Debuggin ag_data()
+
+08 May:
+
+#Add
+addStatement(rep,"<http:a>", "<http:p>", '"a"', "<http:c1>")
+addStatement(rep,"<http:b>", "<http:p>", '"b"', "<http:c2>")
+
+# Query
+evalQuery(rep,"select ?literals {?s <http:p> ?literals }")
+
+For the query above the response text is:
+
+> content(resp, "text")
+[1] "{\"names\":[\"literals\"],\"values\":[[\"\\\"b\\\"\"],[\"\\\"a\\\"\"]]}"
+
+> parsed = jsonlite::fromJSON(content(resp, "text"), simplifyVector = TRUE)
+$names
+[1] "literals"
+
+$values
+     [,1]
+[1,] "\"b\""
+[2,] "\"a\""
+
+{"head":{"vars":["literals"]},"results":{"bindings":[{"literals":{"type":"literal","value":"b"}},{"literals":{"type":"literal","value":"a"}}]}}
+
+This is very different from what gets returned from a CONSTRUCT query.
+
+How can it be that the result from a CONSTRUCT query is so different from the SELECT query? Perhaps the point is that SELECT has always column names, because it can be any combination of values that gets returned, whereas CONSTRUCT creates triples. Those have no columns and no column names. The solution to this is to (a) either add S-P-O as names and then have this process like a 3-column response, or (b) direct the output to a string like format.
+On (b), can it be arranged to return `content(resp,"text")`? I think that would be rather straightforward:
+
+in Line ~ 16, the first test,says:
+
+ if(grepl("ask",tolower(queryargs$query))){
+    return(content(resp))
+
+We could extend this like so:
+
+   if(grepl("ask",tolower(queryargs$query))){
+    return(content(resp))
+     } else if(grepl("construct",tolower(queryargs$query))){
+     return(content(resp,"text"))
+    } else if ...
+
+This does indeed do the job :-).
+
+So, as the next step, we need to work with the returned triples as a data structure, in any application that makes a CONSTRUCT request. Before that, the changed function needs to be added to the allegRo package and be built again. This requires to change the file in a copied Github repo.
+
+
