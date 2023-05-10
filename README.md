@@ -4,7 +4,7 @@ An API for the semantic graph database, AllegroGraph.
 To use this package, you'll need to install your own AllegroGraph server. To install a free version, follow this [link](http://franz.com/agraph/downloads/)
 and follow the installation instructions.
 
-Revised May 2023: Now also returns a value for CONSTRUCT statements. 
+Revised May 2023: Now also returns a dataframe for CONSTRUCT and DESCRIBE queries. 
 
 ### Installation
 
