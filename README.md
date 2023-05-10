@@ -19,6 +19,9 @@ if (packageVersion("devtools") < 1.6) {
 devtools::install_github("prei007/allegRo")
 ```
 
+The orginal version (no longer maintained, it seems) can be installed with `devtools::install_github("baasman/allegRo")`. 
+
+
 ### An introduction to the basic function supported by allegRo
 
 We'll start off with creating a connection to the server, and specifying our credentials. For example, my test server is located on "localhost:10059", so that is where I'll be pointing it too. By specifying the testConnection = TRUE we can perform a simple get command to ensure we a receiving a response from the server.
