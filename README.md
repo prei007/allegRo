@@ -16,7 +16,7 @@ To install the latest version of this package
 if (packageVersion("devtools") < 1.6) {
       install.packages("devtools")
     }
-devtools::install_github("baasman/allegRo")
+devtools::install_github("prei007/allegRo")
 ```
 
 ### An introduction to the basic function supported by allegRo
@@ -25,7 +25,7 @@ We'll start off with creating a connection to the server, and specifying our cre
 
 ```r
 url = "http://localhost:10059/"
-user = "baasman"
+user = "JohnDoe"
 password = "mypassword"
 
 service = service(url,user,password,testConnection = TRUE)
