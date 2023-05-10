@@ -129,15 +129,18 @@ ag_data = function(service, url,queryargs,body,returnType = NULL,cleanUp,convert
     return(content(resp, "text"))
 # continue with old code; note that DESCRIBE needs also fixing.
   } else if(grepl("describe",tolower(queryargs$query))){
-      parsed = jsonlite::fromJSON(content(resp,"text"),simplifyVector = TRUE)
-      if(is.integer(mean(unlist(lapply(lapply(parsed,as.list),length))))){
-        ret = do.call(rbind,parsed)
-        colnames(ret) = paste0("v",1:ncol(ret))
-      } else{
-        warning("uneven pattern lengths, can not converge to matrix")
-        ret = parsed
-        cleanUp = FALSE
-      }
+# changing what's shown about a DESCRIBE query
+    return(content(resp, "text"))
+      # parsed = jsonlite::fromJSON(content(resp,"text"),simplifyVector = TRUE)
+      # if(is.integer(mean(unlist(lapply(lapply(parsed,as.list),length))))){
+      #   ret = do.call(rbind,parsed)
+      #   colnames(ret) = paste0("v",1:ncol(ret))
+      # } else{
+      #   warning("uneven pattern lengths, can not converge to matrix")
+      #   ret = parsed
+      #   cleanUp = FALSE
+      # }
+# continuing with old code from here on
   } else if(http_type(resp) == "application/json"){
       parsed = jsonlite::fromJSON(content(resp,"text"),simplifyVector = TRUE)
       if(length(parsed$values)==0) stop("Query did not return any results")

@@ -1,7 +1,11 @@
 # testing access to one of my repos
 
 library(devtools)
-install_github("prei007/allegRo", force=TRUE)
+# install_github("prei007/allegRo")
+
+install.packages("~/Documents/misc/r-stuff/allegRo2",
+                 repos = NULL,
+                 type = "source")
 
 library(allegRo)
 
@@ -22,28 +26,9 @@ addStatement(rep,"<http:b>", "<http:p>", '"b"', "<http:c2>")
 # Query
 evalQuery(rep,"select ?literals {?s <http:p> ?literals }")
 
-# addStatement() works, but will construct statements also work?
-# Something like this does not work: .
-
-evalQuery(rep, "INSERT {
-  <http:c> <http:p> <http:d> } WHERE {}")
-
-# Error: INAPPROPRIATE REQUEST: SPARQL/Update queries can only be
-# performed through POST requests.
-
-# But CONSTRUCT does also not work, I think because of a bug
-# in/around the function ag_data() (in file http_class_functions
-# see https://www.statology.org/r-error-operator-is-invalid-for-atomic-vectors/
-# The error is with parsed$values.
-# This would need fixing.
-# https://allegro.callisto.calmip.univ-toulouse.fr/doc/sparql-reference.html#SELECT-bindings-and-ASK-results
-# I think this is due to changes to R that took place in the meantime.
-# The error occurs also with the standard tests, from test0sparql.R, see below
-
-
 
 evalQuery(rep, "CONSTRUCT {?a <http:hasPredicate> ?p} WHERE
-{?a ?p ?o}", returnType = "dataframe" )
+{?a ?p ?o}")
 
 # On my analysis, this fails in ag_data() because the code there seems to
 # expect a very different data format returned in the json file from what is actually
@@ -56,11 +41,6 @@ evalQuery(rep, "CONSTRUCT {?a <http:hasPredicate> ?p} WHERE
 # [1,] "<http:a>" "<http:hasPredicate>" "<http:p>"
 # [2,] "<http:b>" "<http:hasPredicate>" "<http:p>"
 # is.atomic(parsed) and is.matrix(parsed) both return TRUE
-
-
-
-
-
 
 
 
