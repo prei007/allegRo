@@ -355,7 +355,6 @@ listContexts = function(repository){
 evalQuery = function(repository,query,returnType = c("data.table","dataframe","matrix","list"),
                      infer = NULL,context = NULL, cleanUp = FALSE,namedContext = NULL,bindings = NULL,planner = NULL,
                      checkVariables = NULL,limit = NULL,convert = FALSE){
-
   returnType = match.arg(returnType)
   if(returnType=="data.table"){
     if( !("data.table" %in% installed.packages()[,"Package"])) stop("data.table is not installed")
