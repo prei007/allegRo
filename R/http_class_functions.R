@@ -131,7 +131,7 @@ ag_data = function(service, url,queryargs,body,returnType = NULL,cleanUp,convert
     #  original: if(length(parsed[,1])==0) stop("Query did not return any results")
     #  replaced with a test that does not crash itself and returns a value rather than stopping execution.
     #  PR 31May23.
-    if(length(parsed)==0) { return("query failed") }
+    if(length(parsed)==0) { return(c("query failed")) }
     ret = as.data.frame(parsed,stringsAsFactors = FALSE)
     colnames(ret) = c("subject", "predicate", "object")
     # continue with old code;
