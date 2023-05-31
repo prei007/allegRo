@@ -355,7 +355,6 @@ listContexts = function(repository){
 evalQuery = function(repository,query,returnType = c("data.table","dataframe","matrix","list"),
                      infer = NULL,context = NULL, cleanUp = FALSE,namedContext = NULL,bindings = NULL,planner = NULL,
                      checkVariables = NULL,limit = NULL,convert = FALSE){
-
   returnType = match.arg(returnType)
   if(returnType=="data.table"){
     if( !("data.table" %in% installed.packages()[,"Package"])) stop("data.table is not installed")
@@ -372,21 +371,6 @@ evalQuery = function(repository,query,returnType = c("data.table","dataframe","m
 }
 
 
-
-
-
-#does not work yet
-# evalStoredQueries = function(service,catalogid = "root",repo = "",queryName = "statements",bound = NULL,limit = NULL,offset = NULL,
-#                              cleanUp = FALSE, convert = FALSE,session = NULL){
-#   queryargs = list(bound = bound,limit = limit,offset = offset)
-#   body = NULL
-#   if(catalogid == "root"){
-#     url = paste0(service$url,"repositories/",repo,"/queries/",queryName)
-#   } else{
-#     url = paste0(service$url,"catalogs/",catalogid,"/repositories/",repo,"/queries/",queryName)
-#   }
-#   return(ag_data(service = service,url = url,queryargs = queryargs,body = body,cleanUp = cleanUp,convert = convert))
-# }
 
 
 
