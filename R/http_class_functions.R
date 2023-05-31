@@ -174,8 +174,6 @@ ag_data = function(service, url,queryargs,body,returnType = NULL,cleanUp,convert
     ret = removeXMLSchema(ret,convert = convert)
   }
 
-  cat("\n", "******leaving ag_data() with ret= ", as.character(ret), "\n")
-
   structure(
     list(
       return = ret,
