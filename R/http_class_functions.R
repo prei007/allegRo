@@ -109,6 +109,7 @@ ag_data = function(service, url,queryargs,body,returnType = NULL,cleanUp,convert
 
   resp = GET(url,authenticate(service$user,service$password),body = eval(body), query = queryargs )
 
+
   if (!(http_type(resp) %in% c("application/json","text/plain"))) {
     stop("API did not return proper format", call. = FALSE)
   }
@@ -121,7 +122,7 @@ ag_data = function(service, url,queryargs,body,returnType = NULL,cleanUp,convert
   }
 
   if(grepl("ask",tolower(queryargs$query))){
-    return(content(resp))
+    return(content(resp, "text"))
     # new case: a construct query
   } else if (grepl("construct",tolower(queryargs$query))){
     parsed = jsonlite::fromJSON(content(resp,"text"),simplifyVector = TRUE)
