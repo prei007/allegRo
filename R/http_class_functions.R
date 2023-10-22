@@ -109,6 +109,7 @@ ag_data = function(service, url,queryargs,body,returnType = NULL,cleanUp,convert
 
   resp = GET(url,authenticate(service$user,service$password),body = eval(body), query = queryargs )
 
+  browser()
 
   if (!(http_type(resp) %in% c("application/json","text/plain"))) {
     stop("API did not return proper format", call. = FALSE)
