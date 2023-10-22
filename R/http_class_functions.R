@@ -110,7 +110,7 @@ ag_data = function(service,
                    returnType = NULL,
                    cleanUp,
                    convert = FALSE) {
-  cat("\n", "****ag_data() query: ", queryargs$query, "\n")   #dev
+ # cat("\n", "****ag_data() query: ", queryargs$query, "\n")   #dev
 
   resp = GET(
     url,
@@ -178,8 +178,8 @@ ag_data = function(service,
 
     parsed = jsonlite::fromJSON(content(resp, "text"), simplifyVector = TRUE)
 
-    cat("\n", "****ag_data() parsed: ",  "\n") #dev
-    print(parsed) #dev
+  #  cat("\n", "****ag_data() parsed: ",  "\n") #dev
+  #  print(parsed) #dev
 
     # if there are no data from the server, end the function call with empty string
     if (length(parsed$values) == 0) {
