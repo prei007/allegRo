@@ -1,7 +1,6 @@
 #creates return object for get functions, and error checks the get request
 ag_get = function(service, url,queryargs,body,cleanup = FALSE){
 
-
   resp = GET(url,authenticate(service$user,service$password),body = eval(body), query = queryargs )
 
   if (!(http_type(resp) %in% c("application/json","text/plain"))) {
@@ -104,39 +103,54 @@ ag_statements = function(service, url,queryargs,body,returnType = NULL,cleanUp =
 }
 
 
+ag_data = function(service,
+                   url,
+                   queryargs,
+                   body,
+                   returnType = NULL,
+                   cleanUp,
+                   convert = FALSE) {
+ # cat("\n", "****ag_data() query: ", queryargs$query, "\n")   #dev
 
-ag_data = function(service, url,queryargs,body,returnType = NULL,cleanUp,convert = FALSE){
+  resp = GET(
+    url,
+    authenticate(service$user, service$password),
+    body = eval(body),
+    query = queryargs
+  )
 
-  resp = GET(url,authenticate(service$user,service$password),body = eval(body), query = queryargs )
-
-
-  if (!(http_type(resp) %in% c("application/json","text/plain"))) {
+  if (!(http_type(resp) %in% c("application/json", "text/plain"))) {
     stop("API did not return proper format", call. = FALSE)
   }
 
-  if (http_error(resp) ) {
-    stop(
-      print(content(resp)),
-      call. = FALSE
-    )
+  if (http_error(resp)) {
+    stop(print(content(resp)),
+         call. = FALSE)
   }
 
-  if(grepl("ask",tolower(queryargs$query))){
+  ### Case 1: ASK query
+  # This test is only dependent on the query, not the value returned from the query.
+  if (grepl("ask", tolower(queryargs$query))) {
     return(content(resp, "text"))
-    # new case: a construct query
-  } else if (grepl("construct",tolower(queryargs$query))){
-    parsed = jsonlite::fromJSON(content(resp,"text"),simplifyVector = TRUE)
+
+
+  ### Case 2: CONTRUCT query
+  } else if (grepl("construct", tolower(queryargs$query))) {
+    parsed = jsonlite::fromJSON(content(resp, "text"), simplifyVector = TRUE)
     # parsed is a m nx3 matrix of strings, with 3 columns for subject, predicate, and object.
     # check if we have any results:
     # The original test fails in length() already.
     #  original: if(length(parsed[,1])==0) stop("Query did not return any results")
     #  replaced with a test that does not crash itself and returns a value rather than stopping execution.
     #  PR 31May23.
-    if(length(parsed)==0) { return(c("query failed")) }
-    ret = as.data.frame(parsed,stringsAsFactors = FALSE)
+
+    # if there are no data retuned from server, stop further processing
+    if (length(parsed$values) == 0) {
+      return("")
+    }
+    ret = as.data.frame(parsed, stringsAsFactors = FALSE)
     colnames(ret) = c("subject", "predicate", "object")
-    # continue with old code;
-  } else if(grepl("describe",tolower(queryargs$query))){
+  } else if (grepl("describe", tolower(queryargs$query))) {
     # changing what's shown about a DESCRIBE query
     #  return(content(resp, "text"))
     # parsed = jsonlite::fromJSON(content(resp,"text"),simplifyVector = TRUE)
@@ -148,51 +162,62 @@ ag_data = function(service, url,queryargs,body,returnType = NULL,cleanUp,convert
     #   ret = parsed
     #   cleanUp = FALSE
     # }
-    parsed = jsonlite::fromJSON(content(resp,"text"),simplifyVector = TRUE)
-    if(length(parsed[,1])==0) stop("Query did not return any results")
-    ret = as.data.frame(parsed,stringsAsFactors = FALSE)
-    colnames(ret) = c("subject", "predicate", "object")
-    # continuing with old code from here on
-  } else if(http_type(resp) == "application/json"){
-    parsed = jsonlite::fromJSON(content(resp,"text"),simplifyVector = TRUE)
-    if(length(parsed$values)==0) stop("Query did not return any results")
-    if(returnType == "data.table"){
-      ret = data.table::as.data.table(parsed$values,col.names = parsed$names)
+    parsed = jsonlite::fromJSON(content(resp, "text"), simplifyVector = TRUE)
+    # if(length(parsed[,1])==0) {
+    #   stop("Query did not return any results")
+
+    # if there are no data retuned from server, stop further processing
+    if (length(parsed$values) == 0) {
+      return("")
+    }
+      ret = as.data.frame(parsed, stringsAsFactors = FALSE)
+      colnames(ret) = c("subject", "predicate", "object")
+
+  ### Case 3: We are in a SELECT query from here on.
+    } else if (http_type(resp) == "application/json") {
+
+    parsed = jsonlite::fromJSON(content(resp, "text"), simplifyVector = TRUE)
+
+  #  cat("\n", "****ag_data() parsed: ",  "\n") #dev
+  #  print(parsed) #dev
+
+    # if there are no data from the server, end the function call with empty string
+    if (length(parsed$values) == 0) {
+      return("")
+      # else process the response further
+    } else if (returnType == "data.table") {
+      ret = data.table::as.data.table(parsed$values, col.names = parsed$names)
       colnames(ret) = parsed$names
-    } else if(returnType == "dataframe"){
-      ret = as.data.frame(parsed$values,stringsAsFactors = FALSE)
+    } else if (returnType == "dataframe") {
+      ret = as.data.frame(parsed$values, stringsAsFactors = FALSE)
       colnames(ret) = parsed$names
-    } else if(returnType == "matrix"){
+    } else if (returnType == "matrix") {
       ret = as.matrix(parsed$values)
       colnames(ret) = parsed$names
     } else{
       ret = parsed$values
     }
-  } else if(http_type(resp) == "text/plain"){
-    parsed = content(resp,"text")
+  } else if (http_type(resp) == "text/plain") {
+    parsed = content(resp, "text")
   }
-  if(cleanUp){
-    ret = removeXMLSchema(ret,convert = convert)
+  if (cleanUp) {
+    ret = removeXMLSchema(ret, convert = convert)
   }
 
-  structure(
-    list(
-      return = ret,
-      response = resp
-    ),
-    class = "ag_data"
-  )
+  structure(list(return = ret,
+                 response = resp),
+            class = "ag_data")
 }
 
 #' @export
-print.ag_data = function(x, ...){
+print.ag_data = function(x, ...) {
   cat("Retrieved from AllegroGraph Server \n")
   cat("First 10 results... \n \n")
 
-  if(is.data.table(x[["return"]])){
+  if (is.data.table(x[["return"]])) {
     print(x[["return"]])
-  } else if(nrow(x[["return"]])>10){
-   print(x[["return"]][1:10,1:ncol(x[["return"]])])
+  } else if (nrow(x[["return"]]) > 10) {
+    print(x[["return"]][1:10, 1:ncol(x[["return"]])])
   } else{
     print(x[["return"]])
   }
