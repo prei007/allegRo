@@ -134,9 +134,10 @@ ag_data = function(service,
     return(content(resp, "text"))
 
 
-  ### Case 2: CONTRUCT query
+  ### Case 2: CONSTRUCT query
   } else if (grepl("construct", tolower(queryargs$query))) {
     parsed = jsonlite::fromJSON(content(resp, "text"), simplifyVector = TRUE)
+
     # parsed is a m nx3 matrix of strings, with 3 columns for subject, predicate, and object.
     # check if we have any results:
     # The original test fails in length() already.
@@ -145,7 +146,7 @@ ag_data = function(service,
     #  PR 31May23.
 
     # if there are no data retuned from server, stop further processing
-    if (length(parsed$values) == 0) {
+    if (length(parsed) == 0) {
       return("")
     }
     ret = as.data.frame(parsed, stringsAsFactors = FALSE)
